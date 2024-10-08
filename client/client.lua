@@ -6,9 +6,7 @@ end)
 
 RegisterNetEvent('setHalloweenWeather')
 AddEventHandler('setHalloweenWeather', function(weatherType)
-    ClearOverrideWeather()
-    ClearWeatherTypePersist()
-
+    SetWeatherTypeNow("CLEAR") -- Define um clima neutro imediatamente
     local transition_time_in_seconds = 30.0
     local next_weather_type_hash = GetHashKey(weatherType)
     Citizen.InvokeNative(0x59174F1AFE095B5A, next_weather_type_hash, true, true, true, transition_time_in_seconds, false)  
