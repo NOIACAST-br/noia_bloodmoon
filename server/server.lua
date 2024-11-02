@@ -1,34 +1,31 @@
+local bloodMoonStartHour = 22 -- 22:00
+local bloodMoonEndHour = 5     -- 05:00
+
 function EnableHalloweenWeatherVariation(currentTime)
     if Config.undeadWeather then
-        if (currentTime >= 22 or currentTime < 5) then
-            TriggerClientEvent('setHalloweenWeather', -1, "FOG")
+        if (currentTime >= bloodMoonStartHour or currentTime < bloodMoonEndHour) then
+            if not bloodMoonActive then
+                TriggerClientEvent('setHalloweenWeather', -1, "FOG")
+                bloodMoonActive = true  
+            end
         else
-            TriggerClientEvent('setNormalWeather', -1)
+            if bloodMoonActive then
+                TriggerClientEvent('setNormalWeatherWithTransition', -1, 30) 
+                bloodMoonActive = false  
+            end
         end
     else
-        TriggerClientEvent('setNormalWeather', -1)
+        if bloodMoonActive then
+            TriggerClientEvent('setNormalWeatherWithTransition', -1, 30) 
+            bloodMoonActive = false  
+        end
     end
 end
 
-RegisterCommand('setHalloweenWeather', function(source, args, rawCommand)
-    TriggerClientEvent('requestClockHours', source)
-end, false)
-
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(600000) 
-        if Config.undeadWeather then
-            TriggerClientEvent('requestClockHours', -1)
-        end
-    end
-end)
-
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(600000) -- Aguarda 10 minutos antes de verificar novamente
-        if Config.undeadWeather then
-            TriggerClientEvent('requestClockHours', -1)
-        end
+        Citizen.Wait(60000) 
+        TriggerClientEvent('requestClockHours', -1)
     end
 end)
 
@@ -36,3 +33,8 @@ RegisterNetEvent('sendClockHours')
 AddEventHandler('sendClockHours', function(currentTime)
     EnableHalloweenWeatherVariation(currentTime)
 end)
+
+RegisterCommand('setHalloweenWeather', function(source, args, rawCommand)
+    -- Solicita ao cliente a hora do jogo
+    TriggerClientEvent('requestClockHours', source)
+end, false)
